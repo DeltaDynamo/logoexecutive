@@ -6,6 +6,7 @@ const Image = require("../../models/Images");
 const { Images } = require("../../models");
 const mongoose = require("mongoose");
 const { updateImageById } = require("../../services/Images");
+const { cloudFrontInvalidate } = require("../../utils/cloudFront");
 
 const imageReuploadSchema = Joi.object().keys({
   id: Joi.string().trim().required().messages({
@@ -91,6 +92,9 @@ async function adminReUploadController(req, res, next) {
         message: "Failed to update record",
       });
     }
+
+    const invalidationPath = `/${Extension}/${Imagename}.${Extension}`;
+    await cloudFrontInvalidate([invalidationPath]);
 
     res.status(200).json({
       statusCode: 200,
